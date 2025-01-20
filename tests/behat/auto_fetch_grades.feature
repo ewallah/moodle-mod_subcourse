@@ -67,7 +67,7 @@ Feature: Grades are fetched automatically from the referenced course
     #
     And I am on "MainCourse" course homepage
     And I navigate to "View > User report" in the course gradebook
-    And I click on "Student 1" in the "user" search widget
+    And I click on "Student 1" in the "Search users" search combo box
     And the following should exist in the "user-grade" table:
       | Grade item    | Grade | Range   |
       | Unit course 1 | 500   | 0–1000  |
@@ -85,7 +85,7 @@ Feature: Grades are fetched automatically from the referenced course
     And I should not see "Student 2"
     And I am on "MainCourse" course homepage
     And I navigate to "View > User report" in the course gradebook
-    And I click on "Student 1" in the "user" search widget
+    And I click on "Student 1" in the "Search users" search combo box
     And the following should exist in the "user-grade" table:
       | Grade item    | Grade | Range   |
       | Unit course 1 | 750   | 0–1000  |
@@ -97,7 +97,7 @@ Feature: Grades are fetched automatically from the referenced course
       | student2      | M         | student           |
     And I am on "MainCourse" course homepage
     And I navigate to "View > User report" in the course gradebook
-    And I click on "Student 2" in the "user" search widget
+    And I click on "Student 2" in the "Search users" search combo box
     And the following should exist in the "user-grade" table:
       | Grade item    | Grade | Range   |
       | Unit course 1 | 250   | 0–1000  |

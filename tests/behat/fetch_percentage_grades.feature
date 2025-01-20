@@ -85,7 +85,7 @@ Feature: Grades can be fetched either a real values or as percentages
     #
     And I navigate to "View > Single view" in the course gradebook
     And I click on "Users" "link" in the ".page-toggler" "css_element"
-    And I click on "Student 3" in the "user" search widget
+    And I click on "Student 3" in the "Search users" search combo box
     And I turn editing mode on
     And I set the field "Exclude for Manual item 3" to "1"
     And I press "Save"
