@@ -37,14 +37,12 @@ require_once($CFG->dirroot . '/mod/subcourse/locallib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observers {
-
     /**
      * User graded
      *
      * @param \core\event\user_graded $event
-     * @return void
      */
-    public static function user_graded(\core\event\user_graded $event) {
+    public static function user_graded(\core\event\user_graded $event): void {
         global $DB;
 
         $courseid = $event->courseid;
@@ -53,8 +51,16 @@ class observers {
         $subcourses = $DB->get_records('subcourse', ['refcourse' => $courseid], '', 'id, course, refcourse, fetchpercentage');
 
         foreach ($subcourses as $subcourse) {
-            subcourse_grades_update($subcourse->course, $subcourse->id, $subcourse->refcourse,
-                null, false, false, $userid, $subcourse->fetchpercentage);
+            subcourse_grades_update(
+                $subcourse->course,
+                $subcourse->id,
+                $subcourse->refcourse,
+                null,
+                false,
+                false,
+                $userid,
+                $subcourse->fetchpercentage
+            );
         }
     }
 
@@ -65,9 +71,8 @@ class observers {
      * because user can be previously enrolled into subcourse
      *
      * @param \core\event\role_assigned $event
-     * @return void
      */
-    public static function role_assigned(\core\event\role_assigned $event) {
+    public static function role_assigned(\core\event\role_assigned $event): void {
         global $DB;
 
         $courseid = $event->courseid;
@@ -76,8 +81,16 @@ class observers {
         $subcourses = $DB->get_records('subcourse', ['course' => $courseid], '', 'id, course, refcourse, fetchpercentage');
 
         foreach ($subcourses as $subcourse) {
-            subcourse_grades_update($subcourse->course, $subcourse->id, $subcourse->refcourse,
-                null, false, false, $userid, $subcourse->fetchpercentage);
+            subcourse_grades_update(
+                $subcourse->course,
+                $subcourse->id,
+                $subcourse->refcourse,
+                null,
+                false,
+                false,
+                $userid,
+                $subcourse->fetchpercentage
+            );
         }
     }
 
@@ -89,11 +102,10 @@ class observers {
      * marked as completed, too.
      *
      * @param \core\event\course_completed $event
-     * @return void
      */
-    public static function course_completed(\core\event\course_completed $event) {
+    public static function course_completed(\core\event\course_completed $event): void {
         global $CFG, $DB;
-        require_once($CFG->dirroot.'/lib/completionlib.php');
+        require_once($CFG->dirroot . '/lib/completionlib.php');
 
         $courseid = $event->courseid;
         $userid = $event->relateduserid;

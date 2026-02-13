@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/gradelib.php');
+require_once($CFG->libdir . '/gradelib.php');
 
 /**
  * Returns the list of courses the grades can be taken from
@@ -37,7 +37,7 @@ require_once($CFG->libdir.'/gradelib.php');
  * @param int $userid Id of user for which we want to get the list of courses
  * @return array list of course records
  */
-function subcourse_available_courses($userid = null) {
+function subcourse_available_courses($userid = null): array {
     global $COURSE, $USER;
 
     $courses = [];
@@ -55,6 +55,7 @@ function subcourse_available_courses($userid = null) {
             if (in_array($mycourse->id, $ignorecourses)) {
                 continue;
             }
+
             $courses[] = $mycourse;
         }
     }
@@ -81,7 +82,12 @@ function subcourse_available_courses($userid = null) {
  * @param bool $fetchpercentage Re-calculate the grade value so that the displayed percentage matches the original.
  * @return stdClass containing grades array and gradeitem info
  */
-function subcourse_fetch_refgrades($subcourseid, $refcourseid, $gradeitemonly = false, $userids = [], $fetchpercentage = false) {
+function subcourse_fetch_refgrades(
+    $subcourseid,
+    $refcourseid,
+    $gradeitemonly = false,
+    $userids = [],
+    $fetchpercentage = false): \stdClass {
 
     if (empty($refcourseid)) {
         throw new coding_exception('Empty referenced course id');
@@ -96,11 +102,7 @@ function subcourse_fetch_refgrades($subcourseid, $refcourseid, $gradeitemonly = 
 
     // Get grade_item info.
     foreach ($fetchedfields as $property) {
-        if (isset($refgradeitem->$property)) {
-            $return->$property = $refgradeitem->$property;
-        } else {
-            $return->$property = null;
-        }
+        $return->$property = $refgradeitem->$property ?? null;
     }
 
     // If the remote grade_item is non-global scale, do not fetch grades - they can't be used.
@@ -120,8 +122,18 @@ function subcourse_fetch_refgrades($subcourseid, $refcourseid, $gradeitemonly = 
         $cm = get_coursemodule_from_instance("subcourse", $subcourseid);
         $context = context_module::instance($cm->id);
 
-        $users = get_users_by_capability($context, 'mod/subcourse:begraded', 'u.id,u.lastname',
-                                         'u.lastname', '', '', '', '', false, true);
+        $users = get_users_by_capability(
+            $context,
+            'mod/subcourse:begraded',
+            'u.id,u.lastname',
+            'u.lastname',
+            '',
+            '',
+            '',
+            '',
+            false,
+            true
+        );
 
         foreach ($users as $user) {
             if ($userids && !in_array($user->id, $userids)) {
@@ -139,11 +151,9 @@ function subcourse_fetch_refgrades($subcourseid, $refcourseid, $gradeitemonly = 
             if ($grade->finalgrade === null) {
                 // No grade set yet.
                 $return->grades[$user->id]->rawgrade = null;
-
             } else if (empty($fetchpercentage)) {
                 // Fetch the raw value of the final grade in the referenced course.
                 $return->grades[$user->id]->rawgrade = $grade->finalgrade;
-
             } else {
                 // Re-calculate the value so that the displayed percentage matches.
                 // This may make difference when there are excluded grades in the referenced course.
@@ -151,7 +161,6 @@ function subcourse_fetch_refgrades($subcourseid, $refcourseid, $gradeitemonly = 
                     $ratio = ($grade->finalgrade - $grade->rawgrademin) / ($grade->rawgrademax - $grade->rawgrademin);
                     $fakevalue = $return->grademin + $ratio * ($return->grademax - $return->grademin);
                     $return->grades[$user->id]->rawgrade = grade_floatval($fakevalue);
-
                 } else {
                     $return->grades[$user->id]->rawgrade = 0;
                 }
@@ -176,8 +185,16 @@ function subcourse_fetch_refgrades($subcourseid, $refcourseid, $gradeitemonly = 
  * @param bool $fetchpercentage Re-calculate the grade value so that the displayed percentage matches the original.
  * @return int GRADE_UPDATE_OK etc
  */
-function subcourse_grades_update($courseid, $subcourseid, $refcourseid, $itemname = null,
-        $gradeitemonly = false, $reset = false, $userids = [], $fetchpercentage = null) {
+function subcourse_grades_update(
+    $courseid,
+    $subcourseid,
+    $refcourseid,
+    $itemname = null,
+    $gradeitemonly = false,
+    $reset = false,
+    $userids = [],
+    $fetchpercentage = null
+) {
     global $DB;
 
     if (empty($refcourseid)) {
@@ -209,6 +226,7 @@ function subcourse_grades_update($courseid, $subcourseid, $refcourseid, $itemnam
             $params[$property] = $refgrades->$property;
         }
     }
+
     if (!empty($itemname)) {
         $params['itemname'] = $itemname;
     }
@@ -230,19 +248,23 @@ function subcourse_grades_update($courseid, $subcourseid, $refcourseid, $itemnam
             'itemtype' => 'mod',
             'itemmodule' => 'subcourse',
             'iteminstance' => $subcourseid,
-            'itemnumber' => 0
+            'itemnumber' => 0,
         ]);
 
         $gs = grade_grade::fetch_all(['itemid' => $gi->id]);
 
         if (!empty($gs)) {
             foreach ($gs as $g) {
-                if (isset($refgrades->grades[$g->userid])) {
-                    if ($refgrades->grades[$g->userid]->hidden != $g->hidden) {
-                        $g->grade_item = $gi;
-                        $g->set_hidden($refgrades->grades[$g->userid]->hidden);
-                    }
+                if (!isset($refgrades->grades[$g->userid])) {
+                    continue;
                 }
+
+                if ($refgrades->grades[$g->userid]->hidden == $g->hidden) {
+                    continue;
+                }
+
+                $g->grade_item = $gi;
+                $g->set_hidden($refgrades->grades[$g->userid]->hidden);
             }
         }
     }
@@ -256,20 +278,16 @@ function subcourse_grades_update($courseid, $subcourseid, $refcourseid, $itemnam
  * @param mixed $scaleid ID of the scale
  * @return boolean True if scale is global, false if not.
  */
-function subcourse_is_global_scale($scaleid) {
+function subcourse_is_global_scale($scaleid): bool {
     global $DB;
 
     if (!is_numeric($scaleid)) {
         throw new moodle_exception('errnonnumeric', 'subcourse');
     }
 
-    if (!$DB->get_record('scale', ['id' => $scaleid, 'courseid' => 0], 'id')) {
-        // No such scale with courseid 0.
-        return false;
-    } else {
-        // Found the global scale.
-        return true;
-    }
+    // Found the global scale.
+    // No such scale with courseid 0.
+    return (bool) $DB->get_record('scale', ['id' => $scaleid, 'courseid' => 0], 'id');
 }
 
 /**
@@ -277,37 +295,40 @@ function subcourse_is_global_scale($scaleid) {
  *
  * @param array|int $subcourseids ID of subcourse instance or array of IDs
  * @param mixed $time The timestamp, defaults to the current time
- * @return bool
  */
-function subcourse_update_timefetched($subcourseids, $time = null) {
+function subcourse_update_timefetched($subcourseids, $time = null): bool {
     global $DB;
 
     if (empty($subcourseids)) {
         return false;
     }
+
     if (is_numeric($subcourseids)) {
         $subcourseids = [$subcourseids];
     }
+
     if (!is_array($subcourseids)) {
         return false;
     }
+
     if (is_null($time)) {
         $time = time();
     }
+
     if (!is_numeric($time)) {
         return false;
     }
-    list($sql, $params) = $DB->get_in_or_equal($subcourseids);
-    $DB->set_field_select('subcourse', 'timefetched', $time, "id $sql", $params);
+
+    [$sql, $params] = $DB->get_in_or_equal($subcourseids);
+    $DB->set_field_select('subcourse', 'timefetched', $time, "id {$sql}", $params);
 
     return true;
 }
 
 /**
  * The list of fields to copy from remote grade_item
- * @return array
  */
-function subcourse_get_fetched_item_fields() {
+function subcourse_get_fetched_item_fields(): array {
     return ['gradetype', 'grademax', 'grademin', 'scaleid', 'hidden'];
 }
 
@@ -342,7 +363,7 @@ function subcourse_get_current_grade(stdClass $subcourse, int $userid): ?string 
  * @param stdClass $course Course record.
  * @param cm_info|object $cm Course module info.
  */
-function subcourse_set_module_viewed(stdClass $subcourse, context $context, stdClass $course, $cm) {
+function subcourse_set_module_viewed(stdClass $subcourse, context $context, stdClass $course, $cm): void {
     global $CFG;
     require_once($CFG->libdir . '/completionlib.php');
 

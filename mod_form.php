@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/mod/subcourse/locallib.php');
-require_once($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/mod/subcourse/locallib.php');
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
 /**
  * Subcourse settings form
@@ -35,11 +35,10 @@ require_once($CFG->dirroot.'/course/moodleform_mod.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_subcourse_mod_form extends moodleform_mod {
-
     /**
      * Form fields definition
      */
-    public function definition() {
+    public function definition(): void {
         global $CFG, $DB, $COURSE;
 
         $mform = $this->_form;
@@ -53,6 +52,7 @@ class mod_subcourse_mod_form extends moodleform_mod {
         } else {
             $mform->setType('name', PARAM_CLEANHTML);
         }
+
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
@@ -64,17 +64,14 @@ class mod_subcourse_mod_form extends moodleform_mod {
 
         $mycourses = subcourse_available_courses();
 
-        $currentrefcourseid = isset($this->current->refcourse) ? $this->current->refcourse : null;
+        $currentrefcourseid = $this->current->refcourse ?? null;
         $currentrefcoursename = null;
         $currentrefcourseavailable = false;
 
         if (!empty($currentrefcourseid)) {
-
             if ($currentrefcourseid == $COURSE->id) {
                 // Invalid self-reference.
                 $this->current->refcourse = 0;
-                $includenoref = true;
-
             } else {
                 $currentrefcoursename = $DB->get_field('course', 'fullname', ['id' => $currentrefcourseid], IGNORE_MISSING);
             }
@@ -82,8 +79,6 @@ class mod_subcourse_mod_form extends moodleform_mod {
             if ($currentrefcoursename === false) {
                 // Reference to non-existing course.
                 $this->current->refcourse = 0;
-                $includenoref = true;
-
             } else {
                 // Check if the currently set value is still available.
                 foreach ($mycourses as $mycourse) {
@@ -99,32 +94,35 @@ class mod_subcourse_mod_form extends moodleform_mod {
             // Currently referring to a course that is not available for us.
             // E.g. the admin has set up this Subcourse for the teacher or the teacher lost his role in the referred course etc.
             // Give them a chance to just keep such a reference.
-            $mform->addElement('checkbox', 'refcoursecurrent', get_string('refcoursecurrent', 'subcourse'),
-                format_string($currentrefcoursename));
+            $mform->addElement(
+                'checkbox',
+                'refcoursecurrent',
+                get_string('refcoursecurrent', 'subcourse'),
+                format_string($currentrefcoursename)
+            );
             $mform->setDefault('refcoursecurrent', 1);
             $includekeepref = true;
         }
 
         $options = [get_string('none')];
 
-        if (empty($mycourses)) {
-            if (empty($includekeepref)) {
+        if ($mycourses === []) {
+            if ($includekeepref === false) {
                 $options = [0 => get_string('nocoursesavailable', 'subcourse')];
                 $mform->addElement('select', 'refcourse', get_string('refcourselabel', 'subcourse'), $options);
             } else {
                 $mform->addElement('hidden', 'refcourse', 0);
                 $mform->setType('refcourse', PARAM_INT);
             }
-
         } else {
             $catlist = core_course_category::make_categories_list('', 0, ' / ');
 
             foreach ($mycourses as $mycourse) {
-                $courselabel = $catlist[$mycourse->category] . ' / ' . $mycourse->fullname.' ('.$mycourse->shortname.')';
+                $courselabel = $catlist[$mycourse->category] . ' / ' . $mycourse->fullname . ' (' . $mycourse->shortname . ')';
                 if (empty($mycourse->visible)) {
                     if ($config->displayhiddencourses || $mycourse->id == $currentrefcourseid) {
-                        $hiddenlabel = ' '.get_string('hiddencourse', 'subcourse');
-                        $options[$mycourse->id] = $courselabel.$hiddenlabel;
+                        $hiddenlabel = ' ' . get_string('hiddencourse', 'subcourse');
+                        $options[$mycourse->id] = $courselabel . $hiddenlabel;
                     }
                 } else {
                     $options[$mycourse->id] = $courselabel;
@@ -133,9 +131,7 @@ class mod_subcourse_mod_form extends moodleform_mod {
 
             $mform->addElement('autocomplete', 'refcourse', get_string('refcourselabel', 'subcourse'), $options);
 
-            if (!empty($includekeepref)) {
-                $mform->disabledIf('refcourse', 'refcoursecurrent', 'checked');
-            }
+            $mform->disabledIf('refcourse', 'refcoursecurrent', 'checked');
         }
 
         $mform->addElement('header', 'section-gradesfetching', get_string('gradesfetching', 'subcourse'));
@@ -174,8 +170,12 @@ class mod_subcourse_mod_form extends moodleform_mod {
         $mform = $this->_form;
         $completionfieldname = 'completioncourse' . $this->get_suffix();
 
-        $mform->addElement('advcheckbox', $completionfieldname, get_string('completioncourse', 'mod_subcourse'),
-            get_string('completioncourse_text', 'mod_subcourse'));
+        $mform->addElement(
+            'advcheckbox',
+            $completionfieldname,
+            get_string('completioncourse', 'mod_subcourse'),
+            get_string('completioncourse_text', 'mod_subcourse')
+        );
         $mform->addHelpButton($completionfieldname, 'completioncourse', 'mod_subcourse');
 
         return [$completionfieldname];

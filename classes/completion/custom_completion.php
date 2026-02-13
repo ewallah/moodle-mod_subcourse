@@ -31,11 +31,10 @@ class custom_completion extends \core_completion\activity_custom_completion {
      * Returns completion state of the custom completion rules
      *
      * @param string $rule
-     * @return integer
      */
     public function get_state(string $rule): int {
         global $CFG, $DB;
-        require_once($CFG->dirroot.'/completion/completion_completion.php');
+        require_once($CFG->dirroot . '/completion/completion_completion.php');
 
         $this->validate_rule($rule);
 
@@ -59,7 +58,6 @@ class custom_completion extends \core_completion\activity_custom_completion {
 
     /**
      * Fetch the list of custom completion rules that this module defines.
-     * @return array
      */
     public static function get_defined_custom_rules(): array {
         return ['completioncourse'];
@@ -67,7 +65,6 @@ class custom_completion extends \core_completion\activity_custom_completion {
 
     /**
      * Returns an associative array of the descriptions of custom completion rules.
-     * @return array
      */
     public function get_custom_rule_descriptions(): array {
         return ['completioncourse' => get_string('completioncourse', 'subcourse')];
@@ -75,7 +72,6 @@ class custom_completion extends \core_completion\activity_custom_completion {
 
     /**
      * Returns an array of all completion rules, in the order they should be displayed to users.
-     * @return array
      */
     public function get_sort_order(): array {
         return [

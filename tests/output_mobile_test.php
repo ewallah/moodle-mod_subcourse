@@ -31,14 +31,11 @@ namespace mod_subcourse;
  * @copyright 2020 David Mudrák <david@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class output_mobile_test extends \advanced_testcase {
-
+final class output_mobile_test extends \advanced_testcase {
     /**
      * Test the return value of the main_view() method.
-     *
-     * @covers ::main_view
      */
-    public function test_main_view() {
+    public function test_main_view(): void {
 
         $this->resetAfterTest();
         $this->setAdminUser();

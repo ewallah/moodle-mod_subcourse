@@ -43,7 +43,6 @@ use external_warnings;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class view_subcourse extends external_api {
-
     /**
      * Describes the parameters for view_subcourse.
      *
@@ -69,22 +68,21 @@ class view_subcourse extends external_api {
 
         $params = ['subcourseid' => $subcourseid];
         $params = self::validate_parameters(self::execute_parameters(), $params);
+
         $warnings = [];
 
         $subcourse = $DB->get_record('subcourse', ['id' => $params['subcourseid']], '*', MUST_EXIST);
-        list($course, $cm) = get_course_and_cm_from_instance($subcourse, 'subcourse');
+        [$course, $cm] = get_course_and_cm_from_instance($subcourse, 'subcourse');
         $context = \context_module::instance($cm->id);
 
         self::validate_context($context);
 
         subcourse_set_module_viewed($subcourse, $context, $course, $cm);
 
-        $result = [
+        return [
             'status' => true,
             'warnings' => $warnings,
         ];
-
-        return $result;
     }
 
     /**
