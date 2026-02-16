@@ -25,6 +25,7 @@
 
 namespace mod_subcourse;
 use advanced_testcase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Unit tests for the functions in the locallib.php file.
@@ -32,9 +33,8 @@ use advanced_testcase;
  * @copyright 2020 David Mudrák <david@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-#[CoversClass(\mod_subcourse::class)]
+#[CoversClass(\mod_subcourse\event\course_module_viewed::class)]
 final class locallib_test extends \advanced_testcase {
-
     /**
      * Setup to ensure that locallib is loaded.
      */

@@ -21,6 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use PHPUnit\Framework\Attributes\CoversClass;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -34,6 +36,7 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
  * @copyright 2020 David Mudrák <david@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[CoversClass(\mod_subcourse\external\view_subcourse::class)]
 class mod_subcourse_external_testcase extends externallib_advanced_testcase {
     /**
      * Test the external function mod_subcourse_view_subcourse.

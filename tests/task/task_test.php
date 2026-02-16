@@ -25,6 +25,7 @@
 
 namespace mod_subcourse;
 use advanced_testcase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Provides subcourse task tests.
@@ -33,12 +34,12 @@ use advanced_testcase;
  * @author    Renaat Debleu <info@eWallah.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-#[CoversClass(\mod_subcourse::class)]
 #[CoversClass(\mod_subcourse\task\fetch_grades::class)]
 #[CoversClass(\mod_subcourse\task\check_completed_refcourses::class)]
 #[CoversClass(\mod_subcourse\observers::class)]
+#[CoversClass(\mod_subcourse\event\subcourse_grades_fetched::class)]
+#[CoversClass(\mod_subcourse\event\course_module_instance_list_viewed::class)]
 final class task_test extends \advanced_testcase {
-
     /**
      * Tests initial setup.
      */
@@ -74,7 +75,7 @@ final class task_test extends \advanced_testcase {
             'refcourse' => $refcourse->id,
             'completioncourse' => 1,
             'completion' => 2,
-            'completionview' => 1.
+            'completionview' => 1.,
         ]);
 
         $generator->create_module('subcourse', [
@@ -96,6 +97,7 @@ final class task_test extends \advanced_testcase {
             'completioncourse' => 1,
             'completion' => 0,
         ]);
+
         $ccompletion = new \completion_completion(['course' => $refcourse->id, 'userid' => $student1->id]);
         $ccompletion->mark_complete();
         $ccompletion = new \completion_completion(['course' => $metacourse->id, 'userid' => $student2->id]);
@@ -123,7 +125,6 @@ final class task_test extends \advanced_testcase {
         $task->execute();
         $out = ob_get_clean();
         $this->assertEquals('', $out);
-                
     }
 
     /**
@@ -143,5 +144,30 @@ final class task_test extends \advanced_testcase {
         $task->execute();
         $out = ob_get_clean();
         $this->assertStringContainsString('Completion tracking not enabled on this site', $out);
+    }
+
+    /**
+     * Test events.
+     */
+    public function test_events(): void {
+        global $CFG;
+        $generator = $this->getDataGenerator();
+        $course = $generator->create_course();
+        $context = \context_course::instance($course->id);
+        $event = \mod_subcourse\event\subcourse_grades_fetched::create([
+            'objectid' => $course->id,
+            'context' => $context,
+            'other' => ['refcourse' => 1],
+        ]);
+        $event->trigger();
+        $this->assertEquals('Grades fetched', $event->get_name());
+        $this->assertStringContainsString('mod/subcourse/view.php', $event->get_url());
+        $this->assertStringContainsString('fetched grades from the course with id', $event->get_description());
+
+        $event = \mod_subcourse\event\course_module_instance_list_viewed::create([
+            'context' => $context,
+            'other' => ['refcourse' => 1],
+        ]);
+        $event->trigger();
     }
 }

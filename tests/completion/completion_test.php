@@ -25,6 +25,7 @@
 
 namespace mod_subcourse\completion;
 use advanced_testcase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Provides subcourse task tests.
@@ -33,9 +34,17 @@ use advanced_testcase;
  * @author    Renaat Debleu <info@eWallah.net>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-#[CoversClass(\mod_subcourse::class)]
 #[CoversClass(\mod_subcourse\completion\custom_completion::class)]
+#[CoversClass(\mod_subcourse\event\subcourse_grades_fetched::class)]
 final class completion_test extends \advanced_testcase {
+    /**
+     * Setup to ensure that locallib is loaded.
+     */
+    public static function setUpBeforeClass(): void {
+        global $CFG;
+        require_once($CFG->libdir . '/completionlib.php');
+        parent::setUpBeforeClass();
+    }
 
     /**
      * Tests custom completion.
@@ -72,7 +81,7 @@ final class completion_test extends \advanced_testcase {
             'refcourse' => $refcourse->id,
             'completioncourse' => 1,
             'completion' => 2,
-            'completionview' => 1.
+            'completionview' => 1,
         ]);
 
         $generator->create_module('subcourse', [
@@ -82,18 +91,13 @@ final class completion_test extends \advanced_testcase {
             'completion' => 1,
         ]);
 
-        $generator->create_module('subcourse', [
-            'course' => $metacourse->id,
-            'refcourse' => 99999,
-            'completioncourse' => 0,
-        ]);
-
         $mod = $generator->create_module('subcourse', [
             'course' => $metacourse->id,
             'refcourse' => $refcourse->id,
-            'completioncourse' => true,
-            'completion' => 0,
+            'completioncourse' => 1,
+            'completion' => COMPLETION_TRACKING_AUTOMATIC,
         ]);
+
         $ccompletion = new \completion_completion(['course' => $refcourse->id, 'userid' => $student1->id]);
         $ccompletion->mark_complete();
         $ccompletion = new \completion_completion(['course' => $metacourse->id, 'userid' => $student2->id]);
@@ -106,6 +110,18 @@ final class completion_test extends \advanced_testcase {
         $this->assertEquals(['completionview', 'completionusegrade', 'completioncourse'], $class->get_sort_order());
         $this->assertEquals(['completioncourse' => 'Require course completed'], $class->get_custom_rule_descriptions());
         $this->assertEquals(['completioncourse'], custom_completion::get_defined_custom_rules());
-        // TODO: $this->assertTrue($customcompletion->get_state('completioncourse'));
+        // TODO: should be true;
+        $this->assertEquals(0, $class->get_state('completioncourse'));
+
+        $mod = $generator->create_module('subcourse', [
+            'course' => $metacourse->id,
+            'refcourse' => 99999,
+            'completioncourse' => 0,
+        ]);
+
+        $cm = \cm_info::create(get_coursemodule_from_instance('subcourse', $mod->id));
+        $class = new custom_completion($cm, $student2->id);
+        $this->expectExceptionMessage("error/Custom completion rule 'completioncourse' is not used by this activity.");
+        $this->assertEquals(0, $class->get_state('completioncourse'));
     }
 }

@@ -29,8 +29,7 @@ Feature: Testing overview integration in subcourse activity
 
   @javascript
   Scenario: The subcourse activity overview report should generate log events
-    Given the site is running Moodle version 5.0 or higher
-    And I am on the "Course 1" "course > activities > subcourse" page logged in as "teacher1"
+    Given I am on the "Course 1" "course > activities > subcourse" page logged in as "teacher1"
     When I am on the "Course 1" "course" page logged in as "teacher1"
     And I navigate to "Reports" in current page administration
     And I click on "Logs" "link"
@@ -40,7 +39,7 @@ Feature: Testing overview integration in subcourse activity
 
   @javascript
   Scenario: The subcourse activity index redirect to the activities overview
-    Given the site is running Moodle version 5.0 or higher
+    Given the site is running Moodle version 5.1 or lower
     And I am on "Course 1" course homepage with editing mode on
     And I add the "Activities" block
     And I click on "Subcourses" "link" in the "Activities" "block"

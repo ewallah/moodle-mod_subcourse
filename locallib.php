@@ -87,7 +87,8 @@ function subcourse_fetch_refgrades(
     $refcourseid,
     $gradeitemonly = false,
     $userids = [],
-    $fetchpercentage = false): \stdClass {
+    $fetchpercentage = false
+): \stdClass {
 
     if (empty($refcourseid)) {
         throw new coding_exception('Empty referenced course id');
