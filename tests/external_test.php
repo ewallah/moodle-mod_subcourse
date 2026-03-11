@@ -37,7 +37,7 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[CoversClass(\mod_subcourse\external\view_subcourse::class)]
-class external_test extends externallib_advanced_testcase {
+class subcourse_externallib_test extends advanced_testcase {
     /**
      * Test the external function mod_subcourse_view_subcourse.
      */
