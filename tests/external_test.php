@@ -21,6 +21,8 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace mod_subcourse;
+
 use PHPUnit\Framework\Attributes\CoversClass;
 
 defined('MOODLE_INTERNAL') || die();
@@ -37,7 +39,7 @@ require_once($CFG->dirroot . '/webservice/tests/helpers.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 #[CoversClass(\mod_subcourse\external\view_subcourse::class)]
-class subcourse_externallib_test extends advanced_testcase {
+class external_test extends \advanced_testcase {
     /**
      * Test the external function mod_subcourse_view_subcourse.
      */
@@ -61,7 +63,7 @@ class subcourse_externallib_test extends advanced_testcase {
         $returnvalue = \mod_subcourse\external\view_subcourse::execute($subcourse->id);
 
         // Clean value to simulate the web service server.
-        $returnvalue = external_api::clean_returnvalue(\mod_subcourse\external\view_subcourse::execute_returns(), $returnvalue);
+        $returnvalue = \external_api::clean_returnvalue(\mod_subcourse\external\view_subcourse::execute_returns(), $returnvalue);
 
         $this->assertEquals(true, $returnvalue['status']);
     }

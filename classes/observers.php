@@ -112,7 +112,6 @@ class observers {
 
         // Get all subcourses that have the completed course as the referenced one.
         $subcourses = $DB->get_records('subcourse', ['refcourse' => $courseid, 'completioncourse' => 1]);
-
         if (empty($subcourses)) {
             // No subcourse interested in this.
             return;

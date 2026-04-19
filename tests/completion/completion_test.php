@@ -102,10 +102,23 @@ final class completion_test extends \advanced_testcase {
         $ccompletion->mark_complete();
         $ccompletion = new \completion_completion(['course' => $metacourse->id, 'userid' => $student2->id]);
         $ccompletion->mark_complete();
+
+        $cm = \cm_info::create(get_coursemodule_from_instance('subcourse', $mod->id));
+        $completion = new \completion_info($metacourse); 
+        $completion->update_state($cm, COMPLETION_COMPLETE, $student2->id);
+
+        $task = new \core\task\completion_regular_task();
+        ob_start();
+        $task->execute();
+        sleep(1);
+        $task->execute();
+        \phpunit_util::run_all_adhoc_tasks();
+        \phpunit_util::run_all_adhoc_tasks();
+        ob_end_clean();
+        
         rebuild_course_cache($refcourse->id, true);
         rebuild_course_cache($metacourse->id, true);
 
-        $cm = \cm_info::create(get_coursemodule_from_instance('subcourse', $mod->id));
         $class = new custom_completion($cm, $student2->id);
         $this->assertEquals(['completionview', 'completionusegrade', 'completioncourse'], $class->get_sort_order());
         $this->assertEquals(['completioncourse' => 'Require course completed'], $class->get_custom_rule_descriptions());
