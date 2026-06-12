@@ -104,7 +104,7 @@ final class completion_test extends \advanced_testcase {
         $ccompletion->mark_complete();
 
         $cm = \cm_info::create(get_coursemodule_from_instance('subcourse', $mod->id));
-        $completion = new \completion_info($metacourse); 
+        $completion = new \completion_info($metacourse);
         $completion->update_state($cm, COMPLETION_COMPLETE, $student2->id);
 
         $task = new \core\task\completion_regular_task();
@@ -115,7 +115,7 @@ final class completion_test extends \advanced_testcase {
         \phpunit_util::run_all_adhoc_tasks();
         \phpunit_util::run_all_adhoc_tasks();
         ob_end_clean();
-        
+
         rebuild_course_cache($refcourse->id, true);
         rebuild_course_cache($metacourse->id, true);
 
